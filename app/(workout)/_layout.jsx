@@ -19,6 +19,8 @@ const WorkoutLayout = () => {
                 },
                 tabBarActiveTintColor: theme.iconColorFocused,
                 tabBarInactiveTintColor: theme.iconColor,
+                presentation: 'card',
+                animationTypeForReplace: 'push',
             }}
             >
 

@@ -28,22 +28,26 @@ const Home = () => {
 
   const router = useRouter(); // Initialize router in the screen component
   const [todayWorkout, setTodayWorkout] = useState(null);
+  const [currentPlan, setCurrentPlan] = useState(null);
 
   const handleNavigate = () => {
     // This function will be passed to the CardWithTransition component
     router.push("/(home_page)/weightCard");
   };
 
-  // Check if today matches workout plan days
+  // Check if today matches workout plan days and load current plany
   const checkTodayWorkout = async () => {
     try {
       const planData = await AsyncStorage.getItem('workoutPlan');
       if (!planData) {
         setTodayWorkout(null);
+        setCurrentPlan(null);
         return;
       }
 
       const plan = JSON.parse(planData);
+      setCurrentPlan(plan);
+      
       const today = new Date();
       const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const todayDayName = daysOfWeek[today.getDay()];
@@ -60,6 +64,7 @@ const Home = () => {
     } catch (error) {
       console.error('Error loading workout plan:', error);
       setTodayWorkout(null);
+      setCurrentPlan(null);
     }
   };
 
@@ -180,25 +185,65 @@ const Home = () => {
         </View>
 
       <Spacer />
-      <TouchableOpacity 
-        activeOpacity={0.7}
-        onPress={() => {
-          console.log('Navigating to workout goal');
-          router.push('/(workout_plan)/workoutGoal');
-        }}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        style={styles.planCardTouchable}
-      >
-        <ThemedCard style={styles.planCard}>
-          <ThemedText title={true}>Create your plan</ThemedText>
-          <ThemedText style={ { color: Colors.dark.tint } }>Create</ThemedText>
-        </ThemedCard>
-      </TouchableOpacity>
+      {currentPlan ? (
+        <TouchableOpacity 
+          activeOpacity={0.7}
+          onPress={() => {
+            router.push('/(workout_plan)/workoutGoal');
+          }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={styles.planCardTouchable}
+        >
+          <ThemedCard style={styles.planCard}>
+            <View style={styles.planHeader}>
+              <ThemedText title={true} style={styles.planTitle}>Your Workout Plan</ThemedText>
+              <TouchableOpacity onPress={() => router.push('/(workout_plan)/workoutGoal')}>
+                <Ionicons name="create-outline" size={20} color={theme.iconColorFocused} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.planInfo}>
+              <View style={styles.planRow}>
+                <ThemedText style={styles.planLabel}>Goal:</ThemedText>
+                <ThemedText style={styles.planValue}>{currentPlan.workoutGoal}</ThemedText>
+              </View>
+              <View style={styles.planRow}>
+                <ThemedText style={styles.planLabel}>Target Weight:</ThemedText>
+                <ThemedText style={styles.planValue}>{currentPlan.weightGoal} kg</ThemedText>
+              </View>
+              <View style={styles.planRow}>
+                <ThemedText style={styles.planLabel}>Duration:</ThemedText>
+                <ThemedText style={styles.planValue}>{currentPlan.duration} min/day</ThemedText>
+              </View>
+              <View style={styles.planRow}>
+                <ThemedText style={styles.planLabel}>Days/Week:</ThemedText>
+                <ThemedText style={styles.planValue}>{currentPlan.selectedDays.length} days</ThemedText>
+              </View>
+            </View>
+          </ThemedCard>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity 
+          activeOpacity={0.7}
+          onPress={() => {
+            console.log('Navigating to workout goal');
+            router.push('/(workout_plan)/workoutGoal');
+          }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={styles.planCardTouchable}
+        >
+          <ThemedCard style={styles.planCard}>
+            <ThemedText title={true}>Create your plan</ThemedText>
+            <ThemedText style={ { color: Colors.dark.tint } }>Create</ThemedText>
+          </ThemedCard>
+        </TouchableOpacity>
+      )}
 
       <View style={styles.flexWrapper}>
         <ThemedCard style={ styles.tallCard }>
           <View style={styles.todayWorkoutHeader}>
-            <Ionicons name="barbell" size={24} color={theme.iconColorFocused} />
+            <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255, 149, 0, 0.15)' }]}>
+              <Ionicons name="barbell" size={20} color="#ff9500" />
+            </View>
             <ThemedText title={true} style={styles.todayWorkoutTitle}>Today's Workout</ThemedText>
           </View>
           {todayWorkout ? (
@@ -219,18 +264,33 @@ const Home = () => {
           onCardPress={handleNavigate}
         >
         <ThemedCard style={ styles.tallCard }>
-          <ThemedText title={true}>Weight</ThemedText>
+          <View style={styles.cardContent}>
+            <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255, 149, 0, 0.15)' }]}>
+              <Ionicons name="scale" size={20} color="#ff9500" />
+            </View>
+            <ThemedText title={true} style={styles.cardTitle}>Weight</ThemedText>
+          </View>
         </ThemedCard>
         </CardWithTransition>
 
         <Link href={"/(home_page)/healthTips"}>
         <ThemedCard style={ styles.tallCard }>
-          <ThemedText title={true}>Health Tips</ThemedText>
+          <View style={styles.cardContent}>
+            <View style={[styles.iconWrapper, { backgroundColor: 'rgba(52, 199, 89, 0.15)' }]}>
+              <Ionicons name="medical" size={20} color="#34c759" />
+            </View>
+            <ThemedText title={true} style={styles.cardTitle}>Health Tips</ThemedText>
+          </View>
         </ThemedCard></Link>
 
         <Link href={"/(home_page)/nutritionAdvice"}>
         <ThemedCard style={ styles.tallCard }>
-          <ThemedText title={true}>Nutrition Advice</ThemedText>
+          <View style={styles.cardContent}>
+            <View style={[styles.iconWrapper, { backgroundColor: 'rgba(0, 122, 255, 0.15)' }]}>
+              <Ionicons name="nutrition" size={20} color="#007aff" />
+            </View>
+            <ThemedText title={true} style={styles.cardTitle}>Nutrition Advice</ThemedText>
+          </View>
         </ThemedCard></Link>
       </View>
 
@@ -347,13 +407,10 @@ const styles = StyleSheet.create({
     height: 180, 
     marginBottom: 20, 
   },
-  todayWorkoutHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   todayWorkoutTitle: {
-    marginLeft: 8,
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: '600',
   },
   todayWorkoutContent: {
     flex: 1,
@@ -372,5 +429,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.6,
     marginTop: 10,
+  },
+  planHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  planTitle: {
+    fontSize: 20,
+  },
+  planInfo: {
+    gap: 10,
+  },
+  planRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  planLabel: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  planValue: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  cardContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  todayWorkoutHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
 })

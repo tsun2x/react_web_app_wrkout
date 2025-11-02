@@ -10,6 +10,8 @@ export default function WorkoutPlanLayout() {
     <Stack screenOptions={{
         headerStyle: { backgroundColor: theme.navBackground },
         headerTintColor: theme.title,
+        presentation: 'card',
+        animationTypeForReplace: 'push',
       }}
     >
       <Stack.Screen 

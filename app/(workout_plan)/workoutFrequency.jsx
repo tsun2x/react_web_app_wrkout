@@ -15,6 +15,7 @@ const WorkoutFrequency = () => {
 
   const [duration, setDuration] = useState(30);
   const [selectedDays, setSelectedDays] = useState(['Mon', 'Wed', 'Thu', 'Fri']);
+  const [weeks, setWeeks] = useState(2);
   const [sportsReminder, setSportsReminder] = useState(true);
   const [reminderTime, setReminderTime] = useState('8:00 AM');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -50,6 +51,7 @@ const WorkoutFrequency = () => {
           weightGoal: params.weightGoal,
           duration: duration.toString(),
           selectedDays: selectedDays.join(','),
+          weeks: weeks.toString(),
           sportsReminder: sportsReminder.toString(),
           reminderTime,
         }
@@ -140,6 +142,32 @@ const WorkoutFrequency = () => {
           <Text style={[styles.daysHint, { color: theme.text }]}>
             Choose at least 3 days per week for workouts.
           </Text>
+        </View>
+
+        {/* Weeks Selection Section */}
+        <View style={styles.section}>
+          <ThemedText title style={styles.sectionTitle}>Workout Duration (Weeks)</ThemedText>
+          <Text style={[styles.weeksValue, { color: '#ff9500' }]}>
+            {weeks} {weeks === 1 ? 'week' : 'weeks'}
+          </Text>
+          
+          <View style={styles.weeksSliderContainer}>
+            <Slider
+              style={styles.slider}
+              minimumValue={1}
+              maximumValue={12}
+              value={weeks}
+              onValueChange={(value) => setWeeks(Math.round(value))}
+              step={1}
+              minimumTrackTintColor="#ff9500"
+              maximumTrackTintColor={theme.uiBackground}
+              thumbTintColor={theme.text}
+            />
+            <View style={styles.sliderLabels}>
+              <Text style={[styles.sliderLabel, { color: theme.text }]}>1 week</Text>
+              <Text style={[styles.sliderLabel, { color: theme.text }]}>12 weeks</Text>
+            </View>
+          </View>
         </View>
 
         {/* Sports Reminder Section */}
@@ -318,6 +346,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 10,
     opacity: 0.7,
+  },
+  weeksValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  weeksSliderContainer: {
+    marginBottom: 15,
   },
   toggleSection: {
     flexDirection: 'row',

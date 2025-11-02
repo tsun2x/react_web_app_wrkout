@@ -20,6 +20,8 @@ const RootLayout = () => {
         },
         tabBarActiveTintColor: theme.iconColorFocused,
         tabBarInactiveTintColor: theme.iconColor,
+        presentation: 'card',
+        animationTypeForReplace: 'push',
       }}
     >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

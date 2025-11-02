@@ -19,6 +19,8 @@ export default function HomeLayout() {
         },
         tabBarActiveTintColor: theme.iconColorFocused,
         tabBarInactiveTintColor: theme.iconColor,
+        presentation: 'card',
+        animationTypeForReplace: 'push',
       }}
     >
          

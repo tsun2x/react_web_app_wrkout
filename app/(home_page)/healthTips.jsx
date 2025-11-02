@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, ScrollView, useColorScheme } from 'react-native'
 import React from 'react'
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors'
 import ThemedView from '../../components/ThemedView'
 import ThemedText from '../../components/ThemedText'
@@ -61,15 +62,25 @@ const HealthTips = () => {
     }
   ]
 
+
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText title style={styles.sectionTitle}>
-          Health Tips for Exercise
-        </ThemedText>
+        <View style={styles.headerSection}>
+          <View style={[styles.iconContainer, { backgroundColor: 'rgba(52, 199, 89, 0.15)' }]}>
+            <Ionicons name="fitness" size={28} color="#34c759" />
+          </View>
+          <View style={styles.headerTextContainer}>
+            <ThemedText title style={styles.sectionTitle}>
+              Health Tips for Exercise
+            </ThemedText>
+            <ThemedText style={styles.headerSubtitle}>Expert guidance for your fitness</ThemedText>
+          </View>
+        </View>
 
         {tips.map((tip) => (
           <View key={tip.number} style={styles.tipItem}>
@@ -101,10 +112,31 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
+  headerSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 25,
+    marginTop: 10,
+  },
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 25,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    opacity: 0.7,
   },
   tipItem: {
     flexDirection: 'row',

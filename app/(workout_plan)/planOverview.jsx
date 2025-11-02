@@ -18,6 +18,7 @@ const PlanOverview = () => {
     weightGoal: parseFloat(router.weightGoal) || 77,
     duration: parseInt(router.duration) || 40,
     selectedDays: router.selectedDays ? router.selectedDays.split(',') : ['Mon', 'Wed', 'Thu'],
+    weeks: parseInt(router.weeks) || 2,
     sportsReminder: router.sportsReminder === 'true',
     reminderTime: router.reminderTime || '8:00 AM',
   });
@@ -27,12 +28,13 @@ const PlanOverview = () => {
   const [calendarDates, setCalendarDates] = useState([]);
 
   useEffect(() => {
-    // Calculate end date (2 weeks from start)
+    // Calculate end date based on weeks (weeks * 7 days)
+    const totalDays = planData.weeks * 7;
     const end = new Date(startDate);
-    end.setDate(end.getDate() + 13);
+    end.setDate(end.getDate() + totalDays - 1);
     setEndDate(end);
 
-    // Generate calendar dates
+    // Generate calendar dates based on weeks
     const dates = [];
     const current = new Date(startDate);
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -41,8 +43,8 @@ const PlanOverview = () => {
     // Get selected day indices
     const selectedDayIndices = planData.selectedDays.map(d => dayMap[d]);
 
-    // Generate 14 days starting from today
-    for (let i = 0; i < 14; i++) {
+    // Generate dates for the selected weeks
+    for (let i = 0; i < totalDays; i++) {
       const date = new Date(current);
       date.setDate(current.getDate() + i);
       const dayIndex = date.getDay();
@@ -55,7 +57,7 @@ const PlanOverview = () => {
       });
     }
     setCalendarDates(dates);
-  }, [planData.selectedDays, startDate]);
+  }, [planData.selectedDays, planData.weeks, startDate]);
 
   const calculateCalories = () => {
     const baseCalories = planData.duration * 10;
@@ -65,7 +67,7 @@ const PlanOverview = () => {
   };
 
   const getTotalDays = () => {
-    return planData.selectedDays.length * 2; // 2 weeks
+    return planData.selectedDays.length * planData.weeks;
   };
 
   const formatDate = (date) => {
@@ -83,6 +85,7 @@ const PlanOverview = () => {
       weightGoal: planData.weightGoal,
       duration: planData.duration,
       selectedDays: planData.selectedDays,
+      weeks: planData.weeks,
       sportsReminder: planData.sportsReminder,
       reminderTime: planData.reminderTime,
       startDate: startDate.toISOString(),
@@ -147,6 +150,12 @@ const PlanOverview = () => {
 
         {/* Summary Statistics */}
         <View style={styles.statsSection}>
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: theme.title }]}>
+              {planData.weeks} {planData.weeks === 1 ? 'Week' : 'Weeks'}
+            </Text>
+            <Text style={[styles.statLabel, { color: theme.text }]}>Duration</Text>
+          </View>
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: theme.title }]}>
               {planData.selectedDays.length} Day
