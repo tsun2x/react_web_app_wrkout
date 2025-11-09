@@ -19,8 +19,6 @@ const WorkoutLayout = () => {
                 },
                 tabBarActiveTintColor: theme.iconColorFocused,
                 tabBarInactiveTintColor: theme.iconColor,
-                presentation: 'card',
-                animationTypeForReplace: 'push',
             }}
             >
 
@@ -29,13 +27,13 @@ const WorkoutLayout = () => {
                     options={ {title: 'Workout List', headershwon: false}}
                 />
                 <Stack.Screen
-                    name='WorkoutDetails' // 💡 NEW SCREEN ADDED
+                    name='WorkoutDetails' 
                     options={ {
                         title: 'Tracker',
                     }}
                 />
                 <Stack.Screen
-                    name='deleteSelectedWorkout' // 💡 NEW SCREEN ADDED
+                    name='deleteSelectedWorkout' 
                     options={ {
                         title: 'Delete Workout',
                     }}

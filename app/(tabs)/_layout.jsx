@@ -40,14 +40,14 @@ const TabsLayout = () => {
             />
         )}} />
 
-        <Tabs.Screen name="profile" 
-        options={{ title: 'Profile', tabBarIcon: ({ focused }) => (
-            <Ionicons 
-                size={24}
-                color={focused ? theme.iconColorFocused : theme.iconColor}
-                name={focused ? "person" : "person-outline"}
-            />
-        )}} />
+        <Tabs.Screen name="info"
+        options={{title: 'Info', tabBarIcon: ({ focused }) => (
+      <Ionicons
+        size={24}
+        color={focused ? theme.iconColorFocused : theme.iconColor}
+        name={focused ? "information-circle" : "information-circle-outline"}
+      />
+    )}}/>
         
     </Tabs>
   )

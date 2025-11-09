@@ -27,45 +27,48 @@ const formatTime = (ms) => {
 };
 
 // Helper Component for Metrics Display
+// 🚀 DESIGN FIX: Restructured for column layout (Icon, Value, Label)
 const MetricBox = ({ label, value, icon, theme }) => (
     <View style={[styles.metricBox, { backgroundColor: theme.cardBackground }]}>
-        <Ionicons name={icon} size={24} color={theme.tint} />
-        <ThemedText style={styles.metricValue}>{value}</ThemedText>
-        <ThemedText style={[styles.metricLabel, { color: theme.textSecondary }]}>
+        <Ionicons 
+            name={icon} 
+            size={36} // Larger icon
+            color={theme.tint} 
+            style={styles.metricIconColumn} // Applied new column style
+        />
+        <ThemedText style={styles.metricValueColumn}>{value}</ThemedText>
+        <ThemedText style={[styles.metricLabelColumn, { color: theme.textSecondary }]}>
             {label}
         </ThemedText>
     </View>
 );
 
-// Confirmation Modal Component
-const ConfirmWorkoutModal = ({ theme, results, onConfirm, onCancel }) => (
+// Confirmation Modal Component - REVISED
+const ConfirmWorkoutModal = ({ theme, onConfirm, onCancel }) => ( // Removed 'results' prop
     <View style={[modalStyles.overlay, { backgroundColor: theme.overlay || 'rgba(0,0,0,0.7)' }]}>
         <View style={[modalStyles.container, { backgroundColor: theme.cardBackground }]}>
-            <ThemedText style={modalStyles.title}>Workout Finished?</ThemedText>
+            <ThemedText style={modalStyles.title}>Workout Paused</ThemedText>
             
-            <View style={modalStyles.dataRow}>
-                <Ionicons name="timer-outline" size={20} color={theme.text} style={modalStyles.icon} />
-                <ThemedText style={modalStyles.dataText}>Duration: {results.duration}</ThemedText>
-            </View>
-            <View style={modalStyles.dataRow}>
-                <Ionicons name="flame-outline" size={20} color={theme.text} style={modalStyles.icon} />
-                <ThemedText style={modalStyles.dataText}>Calories: {results.calories} KCAL</ThemedText>
-            </View>
+            {/* Removed the Duration and Calories display */}
             
-            <ThemedText style={modalStyles.question}>Do you want to record this data?</ThemedText>
+            <ThemedText style={modalStyles.question}>
+                Do you want to end the workout or resume?
+            </ThemedText>
             
             <View style={modalStyles.buttonGroup}>
                 <TouchableOpacity
-                    style={[modalStyles.button, { backgroundColor: theme.tint, marginRight: 10 }]}
-                    onPress={onConfirm}
+                    style={[modalStyles.button, { backgroundColor: theme.error, marginRight: 10 }]}
+                    onPress={onConfirm} 
                 >
-                    <Text style={modalStyles.buttonText}>Yes, Record</Text>
+                    {/* 🚀 FIXED: Wrapped in <Text> */}
+                    <Text style={modalStyles.buttonText}>End Workout</Text> 
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[modalStyles.button, { backgroundColor: theme.tabBarInactive }]}
-                    onPress={onCancel}
+                    style={[modalStyles.button, { backgroundColor: theme.tint }]}
+                    onPress={onCancel} 
                 >
-                    <Text style={modalStyles.buttonText}>No, Resume</Text>
+                    {/* 🚀 FIXED: Wrapped in <Text> */}
+                    <Text style={modalStyles.buttonText}>Resume Workout</Text> 
                 </TouchableOpacity>
             </View>
         </View>
@@ -88,7 +91,7 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
     const distanceKm = (timeElapsed / MS_PER_METER / 1000).toFixed(2);
     const caloriesBurned = Math.floor(timeElapsed / MS_PER_CALORIE);
     
-    // Results for the modal
+    // Results object is now local, used only for current metrics display
     const finalResults = {
         workoutName,
         timeElapsed,
@@ -112,7 +115,6 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
     // Long Press Pause Effect
     useEffect(() => {
         if (isPausing) {
-            // Check if progressAnim is actually an Animated value before using it
             if (progressAnim && progressAnim.setValue) {
                 progressAnim.setValue(0);
                 Animated.timing(progressAnim, {
@@ -127,19 +129,19 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
                 });
             }
         } else {
-            // 💡 FIX: Check if .stop is a function before calling it
             if (progressAnim && typeof progressAnim.stop === 'function') {
                 progressAnim.stop(); 
                 progressAnim.setValue(0);
             }
         }
-    }, [isPausing, progressAnim]); // Added progressAnim to dependency array for safety
+    }, [isPausing, progressAnim]); 
 
-    // Logic for playing/resuming (short press)
-    const handleStartPause = (isLongPress = false) => {
-        if (!isRunning && !isLongPress) {
-            setIsRunning(true);
-        } 
+    // 🌟 FIX 1: Revised Logic for playing/pausing/resuming (short press)
+    const handleStartPause = () => {
+        // Only allow short press to toggle if we are NOT in the middle of a long-press sequence
+        if (!isPausing) {
+            setIsRunning(prevIsRunning => !prevIsRunning);
+        }
     };
     
     // Logic for long press start (starts loading)
@@ -153,7 +155,6 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
     // Logic for finger lift before loading completion (resumes)
     const handlePressOut = () => {
         if (isPausing) {
-            // Check if progressAnim has the necessary internal property before access
             if (progressAnim && progressAnim._value < 1) { 
                 setIsPausing(false);
                 setIsRunning(true); 
@@ -161,14 +162,17 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
         }
     };
 
-    // Handle Stop, called by Modal's "Yes"
+    // Handle Stop, called by Modal's "End Workout"
     const handleStop = () => {
         setShowModal(false); 
-        onWorkoutEnd(finalResults);
+        // CRITICAL: Now calls onWorkoutEnd() without results.
+        if (onWorkoutEnd) {
+            onWorkoutEnd();
+        }
         setTimeElapsed(0); 
     };
 
-    // Handle Cancel/Resume, called by Modal's "No"
+    // Handle Cancel/Resume, called by Modal's "Resume Workout"
     const handleCancel = () => {
         setShowModal(false); 
         setIsRunning(true); 
@@ -176,6 +180,7 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
     
     // Determine the button icon based on state
     let buttonIconName = 'play';
+    // If running or in the long-press sequence, show pause icon
     if (isRunning || isPausing) { 
         buttonIconName = 'pause';
     }
@@ -226,14 +231,13 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
                         onPress={() => {
                             setIsRunning(false); 
                             setIsPausing(false);
-                            // Also ensure the animation is stopped if it's running
                             if (progressAnim && typeof progressAnim.stop === 'function') {
                                 progressAnim.stop(); 
                             }
                             setShowModal(true); 
                         }}
                     >
-                        <Ionicons name="stop" size={28} color="white" />
+                        <Ionicons name="stop" size={45} color="white" />
                     </TouchableOpacity>
                 )}
 
@@ -243,14 +247,15 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
                         backgroundColor: isRunning ? theme.secondary : theme.tint,
                         opacity: isPausing ? 0.7 : 1, 
                     }]} 
-                    onPress={() => handleStartPause(false)} 
+                    // 🌟 FIX 2: Call the corrected handleStartPause
+                    onPress={handleStartPause} 
                     onLongPress={handleLongPress} 
                     onPressOut={handlePressOut}
                     disabled={showModal}
                 >
                     <Ionicons 
                         name={buttonIconName} 
-                        size={35} 
+                        size={45} 
                         color="white" 
                         style={buttonIconName === 'play' ? { paddingLeft: 5 } : {}} 
                     />
@@ -259,9 +264,9 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
                     {isPausing && (
                         <View style={styles.progressBarBackground}>
                              <Animated.View style={[
-                                styles.progressBar, 
-                                { width: progressWidth, backgroundColor: theme.tint, opacity: 0.8 }
-                            ]} />
+                                 styles.progressBar, 
+                                 { width: progressWidth, backgroundColor: theme.tint, opacity: 0.8 }
+                             ]} />
                              <ThemedText style={styles.pauseText}>PAUSE</ThemedText>
                         </View>
                     )}
@@ -269,11 +274,10 @@ const Timer = ({ workoutName, onWorkoutEnd }) => {
 
             </View>
             
-            {/* Confirmation Modal */}
+            {/* Confirmation Modal - Simplified */}
             {showModal && (
                 <ConfirmWorkoutModal 
                     theme={theme} 
-                    results={finalResults}
                     onConfirm={handleStop}
                     onCancel={handleCancel}
                 />
@@ -287,7 +291,7 @@ export default Timer;
 
 // --- Styles ---
 
-// Styles for the Modal Component
+// Styles for the Modal Component - REVISED
 const modalStyles = StyleSheet.create({
     overlay: {
         position: 'absolute',
@@ -310,6 +314,7 @@ const modalStyles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
     },
+    // dataRow and icon styles are now redundant but kept for other uses if needed
     dataRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -326,8 +331,8 @@ const modalStyles = StyleSheet.create({
     question: {
         fontSize: 18,
         fontWeight: '600',
-        marginTop: 20,
-        marginBottom: 15,
+        marginTop: 10, // Adjusted margin
+        marginBottom: 25, // Adjusted margin
         textAlign: 'center',
     },
     buttonGroup: {
@@ -345,6 +350,8 @@ const modalStyles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
+        padding: 10,
+        width:100
     },
 });
 
@@ -352,22 +359,22 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        paddingTop: 50,
+        paddingTop: 20,
         paddingHorizontal: 20,
     },
     workoutNameText: {
         fontSize: 30,
         fontWeight: 'bold',
-        marginBottom: 40,
+        marginBottom: 20,
     },
     timerCircle: {
         width: 250,
-        height: 250,
+        height: 240,
         borderRadius: 125,
         borderWidth: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 50,
+        marginBottom: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
@@ -382,32 +389,45 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         width: '100%',
-        marginBottom: 50,
+        marginBottom: 20,
     },
+    // 🚀 METRIC BOX DESIGN UPDATES FOR COLUMN LAYOUT
     metricBox: {
         width: '45%',
         borderRadius: 15,
-        padding: 20,
-        alignItems: 'center',
+        padding: 20, 
+        alignItems: 'center', // Centers contents horizontally (Icon, Value, Label)
+        justifyContent: 'space-between', 
+        minHeight: 120, 
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2, 
+        shadowRadius: 5,
+        elevation: 6,
     },
-    metricValue: {
-        fontSize: 28,
+    metricRow: { // DEPRECATED: This was for the previous row layout. Keeping it empty.
+        // Removed flexDirection: 'row'
+    },
+    metricIconColumn: { // NEW: For the icon at the top of the column
+        marginBottom: 5,
+        marginTop: 5,
+    },
+    metricValueColumn: { // NEW: For the large number
+        fontSize: 32, 
         fontWeight: 'bold',
-        marginTop: 5,
+        marginBottom: 2,
     },
-    metricLabel: {
+    metricLabelColumn: { // NEW: For the text label at the bottom
         fontSize: 14,
-        marginTop: 5,
+        fontWeight: '500',
+        textAlign: 'center',
     },
+    // 🚀 END METRIC BOX DESIGN UPDATES
     controlWrapper: {
         width: '100%',
         alignItems: 'center',
         marginBottom: 50,
+        top: 20
     },
     startPauseButton: {
         width: 80,
@@ -416,26 +436,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 5 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 10,
+        borderWidth: 5,
         overflow: 'hidden', 
     },
     stopButtonAbsolute: {
         position: 'absolute',
-        left: '10%',
-        top: 10,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        left: '7%',
+        top: 15,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        borderWidth: 5,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 6,
     },
     // Styles for Long Press Loading
     progressBarBackground: {

@@ -24,14 +24,31 @@ const DEFAULT_WORKOUT_IDS = ['1', '2', '3'];
 // Component for a single item in the selection list
 const WorkoutListItem = ({ item, isSelected, onPress, theme }) => (
     <TouchableOpacity onPress={onPress} style={styles.listItem}>
-        <View style={styles.leftContent}>
-            <Ionicons name={item.icon || 'star'} size={24} color={theme.tint} style={styles.icon} />
-            <ThemedText style={styles.itemText}>{item.text}</ThemedText>
-        </View>
-        {isSelected && (
-            <Ionicons name="checkmark-circle" size={24} color={theme.tint} />
-        )}
-    </TouchableOpacity>
+    <View 
+        style={[
+            styles.leftContent, 
+            {
+                // FIX: Use the 'isSelected' prop to determine the color.
+                // It must be a complete ternary expression wrapped in a style object.
+                color: isSelected ? theme.iconColorFocused : 'transparent',
+                // Note: I used 'backgroundColor' here, 
+                // but you might want to apply the color to the 'borderColor' or 'color' of the text.
+            }
+        ]}
+    >
+        {/* The icon's color could also be conditional on 'isSelected' */}
+        <Ionicons 
+            name={item.icon || 'star'} 
+            size={35} 
+            color={isSelected ? theme.iconColorFocused : theme.iconColor} 
+            style={styles.icon} 
+        />
+        <ThemedText style={styles.itemText}>{item.text}</ThemedText>
+    </View>
+    {isSelected && (
+        <Ionicons name="checkbox-outline" size={25} color={theme.iconColorFocused} />
+    )}
+</TouchableOpacity>
 );
 
 
@@ -61,7 +78,6 @@ const DeleteSelectedWorkout = () => {
     }, [currentActiveWorkouts]);
 
     const [selectedForDeletionIds, setSelectedForDeletionIds] = useState([]);
-
     const toggleSelection = (id) => {
         setSelectedForDeletionIds(prev => {
             if (prev.includes(id)) {
@@ -125,7 +141,10 @@ const DeleteSelectedWorkout = () => {
                 <TouchableOpacity 
                     style={[
                         styles.deleteButton, 
-                        { backgroundColor: theme.error, opacity: selectedCount > 0 ? 1 : 0.5 }
+                        { opacity: selectedCount > 0 ? 1 : 0.5,
+                            color: selectedCount > 0 ? theme.iconColorFocused: theme.iconColor,
+                            backgroundColor: selectedCount > 0 ? '#c4ce37ff' : theme.uiBackground,
+                         }
                     ]}
                     onPress={handleDeleteWorkouts}
                     disabled={selectedCount === 0}
@@ -142,25 +161,55 @@ const DeleteSelectedWorkout = () => {
 export default DeleteSelectedWorkout
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
+    container: { 
+        flex: 1 
+
+    },
     header: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', 
-        paddingHorizontal: 15, height: 60, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: '#444',
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        paddingHorizontal: 15, 
+        height: 60, 
+        borderBottomWidth: StyleSheet.hairlineWidth, 
+        borderColor: '#444',
     },
-    closeButton: { padding: 5 },
-    list: { flex: 1, paddingHorizontal: 20 },
+    closeButton: { 
+        padding: 5 
+    },
+    list: { 
+        flex: 1, 
+        paddingHorizontal: 20 
+    },
     listItem: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingVertical: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: '#444',
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        paddingVertical: 15, 
+        borderBottomWidth: StyleSheet.hairlineWidth, 
+        borderColor: '#444',
     },
-    leftContent: { flexDirection: 'row', alignItems: 'center' },
-    icon: { marginRight: 15 },
-    itemText: { fontSize: 18 },
+    leftContent: { 
+        flexDirection: 'row', 
+        alignItems: 'center' 
+    },
+    icon: { 
+        marginRight: 15 
+    },
+    itemText: { 
+        fontSize: 18 
+    },
     buttonContainer: {
-        padding: 20, borderTopWidth: StyleSheet.hairlineWidth, borderColor: '#333',
+        
     },
     deleteButton: {
-        padding: 15, borderRadius: 10, alignItems: 'center',
+        padding: 15,
+        margin: 20,
+        marginBottom: 60,
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
     },
     buttonText: {
         fontSize: 18,

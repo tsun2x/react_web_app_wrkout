@@ -2,19 +2,17 @@ import { StyleSheet, View, useColorScheme } from 'react-native';
 import React from 'react';
 import ThemedView from '../../components/ThemedView';
 import ThemedText from '../../components/ThemedText';
-import { useLocalSearchParams, useRouter } from 'expo-router'; // useRouter is used here
+import { useLocalSearchParams, useRouter } from 'expo-router'; 
 import Timer from './Timer';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 
-// Define the names of the workouts that should show the Timer
 const DEFAULT_WORKOUT_NAMES = [
     'Walking', 
     'Outdoor Running', 
     'Outdoor Cycling'
 ];
 
-// Component for the "Connect Device" message (for non-default workouts)
 const ConnectDeviceMessage = ({ theme }) => (
     <View style={[styles.connectContainer, { backgroundColor: theme.cardBackground }]}>
         <Ionicons 
@@ -26,7 +24,7 @@ const ConnectDeviceMessage = ({ theme }) => (
         <ThemedText style={styles.connectTitle}>
             Device Required
         </ThemedText>
-        <ThemedText style={[styles.connectText, { color: theme.textSecondary }]}>
+        <ThemedText style={[styles.connectText, { color: theme.text }]}>
             This workout requires a connected fitness device for tracking.
         </ThemedText>
     </View>
@@ -36,32 +34,27 @@ const WorkoutDetails = () => {
     const { workoutName } = useLocalSearchParams(); 
     const colorScheme = useColorScheme();
     const theme = Colors[colorScheme] ?? Colors.light;
-    const router = useRouter(); // Initialize router
+    const router = useRouter(); 
 
     const isDefaultWorkout = DEFAULT_WORKOUT_NAMES.includes(workoutName);
 
-    // Function called when the timer ends (passed to the Timer component)
-    const handleWorkoutEnd = (results) => {
-        // 💡 FIX: Explicitly navigate to the 'workout.jsx' file
-        router.replace({
-            // Path is: (root folder of the stack) / (file name of the carousel)
-            pathname: '/workout', 
-            params: {
-                completedWorkout: JSON.stringify(results)
-            }
-        });
+    // Function handles navigation back to the main workout screen
+    const handleWorkoutEnd = () => {
+        // Use 'replace' to go back and replace 'WorkoutDetails'
+        router.replace('/workout');
     };
 
     return (
         <ThemedView style={styles.container}>
             {isDefaultWorkout ? (
-                // Passed the new callback function to the Timer
-                <Timer 
-                    workoutName={workoutName || "workout"} 
-                    onWorkoutEnd={handleWorkoutEnd} // Passes the function to Timer
+                // Passed the callback function to the Timer
+                <Timer
+                    workoutName={workoutName || "Workout"}
+                    onWorkoutEnd={handleWorkoutEnd} // Triggers navigation when timer finishes
                 />
             ) : (
                 <View style={styles.centeredContentWrapper}>
+                    {/* Shows this message for non-default workouts */}
                     <ConnectDeviceMessage theme={theme} />
                 </View>
             )}
@@ -76,7 +69,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     centeredContentWrapper: {
-        flex: 1,
+        top: 150,
         justifyContent: 'center', 
         alignItems: 'center',
     },
@@ -95,10 +88,10 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 10,
+        textAlign: 'center',
     },
     connectText: {
         fontSize: 16,
         textAlign: 'center',
-        lineHeight: 24,
     }
 });

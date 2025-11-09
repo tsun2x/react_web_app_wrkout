@@ -28,16 +28,16 @@ const DEFAULT_WORKOUTS = [
 // Component for a single item in the selection list (WorkoutListItem)
 const WorkoutListItem = ({ item, isSelected, onToggle, theme }) => {
     const iconName = isSelected ? 'checkbox-outline' : 'square-outline';
-    const iconColor = isSelected ? theme.tint : theme.text;
-    const checkboxColor = isSelected ? theme.tint : theme.textSecondary;
+    const iconColor = isSelected ? theme.iconColorFocused: theme.iconColor ;
+    const checkboxColor = isSelected ? theme.iconColorFocused: theme.iconColor;
 
     return (
         <TouchableOpacity style={styles.listItem} onPress={() => onToggle(item.id)}>
             <View style={styles.leftContent}>
-                <Ionicons name={item.icon} size={24} color={iconColor} style={styles.icon} />
+                <Ionicons name={item.icon} size={35} color={iconColor} style={styles.icon} />
                 <ThemedText style={styles.itemText}>{item.text}</ThemedText>
             </View>
-            <Ionicons name={iconName} size={24} color={checkboxColor} />
+            <Ionicons name={iconName} size={25} color={checkboxColor} />
         </TouchableOpacity>
     );
 };
@@ -119,27 +119,6 @@ const AddWorkoutScreen = () => {
 
     return (
         <ThemedView style={styles.container}>
-
-
-            
-                {/* Delete Button */}
-                <TouchableOpacity
-                    style={[styles.smallButton, { backgroundColor: theme.cardBackground, marginRight: 10 }]}
-                    onPress={() => {
-                        router.navigate({ 
-                            pathname: 'deleteSelectedWorkout',
-                            params: { activeWorkouts: JSON.stringify(activeWorkouts) } 
-                        });
-                    }}
-                >
-                    <Ionicons 
-                        name="trash-bin-outline" 
-                        size={24} 
-                        color={theme.iconColor} 
-                    />
-                </TouchableOpacity>
-
-
             <FlatList
                 data={selectableWorkouts} // shows worktu wala sa carousel
                 renderItem={renderItem}
@@ -156,16 +135,22 @@ const AddWorkoutScreen = () => {
                 <TouchableOpacity
                     style={[
                         styles.addButton,
-                        { backgroundColor: theme.tint, opacity: selectedCount > 0 ? 1 : 0.5 }
+                        { opacity: selectedCount > 0 ? 1 : 0.5,
+                            color: selectedCount > 0 ? '#ffffffff' : theme.text,
+                            backgroundColor: selectedCount > 0 ? '#c4ce37ff' : theme.uiBackground,
+                         }
                     ]}
                     onPress={handleAddWorkouts}
+                    // This is a great practice, it prevents the action when count is 0
                     disabled={selectedCount === 0}
                 >
-                    <Text style={[styles.addButtonText, { color: 'white' }]}>
+                    {/* Check if the button is active/selected based on the count */}
+                    <Text style={styles.addButtonText}>
                         Add ({selectedCount})
                     </Text>
                 </TouchableOpacity>
             </View>
+
         </ThemedView>
     )
 }
@@ -179,6 +164,8 @@ export const options = {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        alignContent: 'center',
+        justifyContent: 'center'
     },
     header: {
         flexDirection: 'row',
@@ -215,14 +202,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     buttonContainer: {
-        padding: 20,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderColor: '#333',
+       
     },
     addButton: {
         padding: 15,
-        borderRadius: 10,
+        margin: 20,
+        marginBottom: 60,
+        borderRadius: 50,
         alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
     },
     addButtonText: {
         fontSize: 18,
